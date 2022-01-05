@@ -20,18 +20,31 @@ use Swoft\Server\SwooleEvent;
 use Swoft\Task\Swoole\FinishListener;
 use Swoft\Task\Swoole\TaskListener;
 use Swoft\WebSocket\Server\WebSocketServer;
+use Swoft\Log\Handler as LogHandler;
 
 return [
+    'lineFormatter'      => [
+        'format'     => '%datetime% [%level_name%] [%channel%] [%event%] [tid:%tid%] [cid:%cid%] [traceid:%traceid%] [spanid:%spanid%] [parentid:%parentid%] %messages%',
+        'dateFormat' => 'Y-m-d H:i:s',
+    ],
     'noticeHandler'      => [
         'logFile' => '@runtime/logs/notice-%d{Y-m-d-H}.log',
+        'formatter' => \bean('lineFormatter'),
+        'levels'    => 'notice,info,debug,trace',
     ],
     'applicationHandler' => [
         'logFile' => '@runtime/logs/error-%d{Y-m-d}.log',
+        'formatter' => \bean('lineFormatter'),
+        'levels'    => 'error,warning',
     ],
     'logger'             => [
         'flushRequest' => false,
         'enable'       => false,
         'json'         => false,
+        'handlers'     => [
+            'application' => \bean('applicationHandler'),
+            'notice'      => \bean('noticeHandler'),
+        ],
     ],
     'httpServer'         => [
         'class'    => HttpServer::class,
